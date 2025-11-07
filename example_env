@@ -1,0 +1,8 @@
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+DATABASE_URL="mysql://root:@localhost:3306/db_belajar"
+
+# NextAuth.js configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=H15VO77UHf+WL6+0DPnUehQO9lo3NTCUqwtn5/v1o7g=
+GOOGLE_CLIENT_ID=xxx
+GOOGLE_CLIENT_SECRET=xxx

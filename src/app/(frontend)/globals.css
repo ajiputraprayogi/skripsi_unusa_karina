@@ -1,0 +1,98 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap'); */
+@import "tailwindcss";
+@plugin "daisyui";
+
+* {
+  font-family: Ubuntu;
+}
+
+/* styles.css */
+.text-glow {
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.6),
+               0 0 10px rgba(255, 255, 255, 0.4),
+               0 0 20px rgba(255, 255, 255, 0.2);
+               /* color: [#897a69]; */
+}
+
+.text-glow-gold {
+  text-shadow: 
+    0 0 5px rgba(255, 215, 0, 0.8),   /* glow tipis */
+    0 0 10px rgba(255, 215, 0, 0.6),  /* glow medium */
+    0 0 20px rgba(255, 215, 0, 0.4);  /* glow lembut */
+  color: #ffe75f; /* teks emas */
+}
+
+input {
+  outline: none;
+}
+
+/* Hilangkan scrollbar (semua browser) */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE dan Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Loader */
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 65px;
+  aspect-ratio: 1;
+  position: relative;
+}
+.loader:before,
+.loader:after {
+  content: "";
+  position: absolute;
+  border-radius: 50px;
+  box-shadow: 0 0 0 3px inset #ffa502;
+  animation: l4 2.5s infinite;
+}
+.loader:after {
+  animation-delay: -1.25s;
+}
+@keyframes l4 {
+  0% {
+    inset: 0 35px 35px 0;
+  }
+  12.5% {
+    inset: 0 35px 0 0;
+  }
+  25% {
+    inset: 35px 35px 0 0;
+  }
+  37.5% {
+    inset: 35px 0 0 0;
+  }
+  50% {
+    inset: 35px 0 0 35px;
+  }
+  62.5% {
+    inset: 0 0 0 35px;
+  }
+  75% {
+    inset: 0 0 35px 35px;
+  }
+  87.5% {
+    inset: 0 0 35px 0;
+  }
+  100% {
+    inset: 0 35px 35px 0;
+  }
+}
+
+.text-primary {
+  color: #F7F4EF;
+}
+.bg-primary{
+  background-color: #F7F4EF;
+}
+.text-brown {
+  color: #2f3542;
+}
+
+button {
+  cursor: pointer;
+}

@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/api/backend/(menu)/(settings)/permissions/[id]/routesrc/app/api/backend/(menu)/roles/[id]/route.jsoutesrc/app/api/backend/(menu)/users/delete/[id]/route.jsoutesrc/app/api/backend/(menu)/users/edit/[id]/route.jsoutesrc/app/api/backend/(menu)/users/create/route.jsoutesrc/app/api/backend/(menu)/roles/route.jsoutesrc/app/api/backend/(menu)/users/route.jsoute.js", "src/app/(frontend)/portfolio/page.jsx", "src/app/api/backend/(menu)/portofolio/[id]/route.js", "src/app/(frontend)/dummyapi/data/[id]/route.js", "src/app/api/(frontend)/(api)/portofolio/eksterior/[slug]/route.js", "src/app/api/backend/(menu)/kontak/[id]/route.js", "src/app/(frontend)/components/section/harga.jsx", "src/app/(frontend)/components/layout/Navbar.jsx"],
+  "exclude": ["node_modules"]
+}

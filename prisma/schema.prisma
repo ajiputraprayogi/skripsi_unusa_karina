@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model permissions {
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @unique
+  grup                 String?                @db.VarChar
+  role_has_permissions role_has_permissions[]
+}
+
+model role_has_permissions {
+  role_id       Int
+  permission_id Int
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  roles         roles       @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@id([role_id, permission_id])
+  @@index([permission_id])
+}
+
+model roles {
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @unique
+  role_has_permissions role_has_permissions[]
+  user_roles           user_roles[]
+}
+
+model user_roles {
+  user_id Int
+  role_id Int
+  roles   roles @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  users   users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@id([user_id, role_id])
+  @@index([role_id])
+}
+
+model users {
+  id         Int          @id @default(autoincrement())
+  nama       String
+  email      String       @unique
+  password   String
+  banner     banner[]
+  portofolio portofolio[]
+  user_roles user_roles[]
+}
+
+model portofolio {
+  id          Int       @id(map: "portfolios_pkey") @default(autoincrement())
+  name        String    @db.VarChar(255)
+  slug        String    @unique(map: "portfolios_slug_key") @db.VarChar(255)
+  image       String?   @db.VarChar(255)
+  description String?
+  created_by  Int
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @default(now()) @db.Timestamp(6)
+  type        String?   @db.VarChar
+  kategori    String?   @db.VarChar
+  users       users     @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_portofolio_user")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model tim {
+  id         Int       @id @default(autoincrement())
+  nama       String    @db.VarChar(100)
+  posisi     String    @db.VarChar(100)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  image      String?   @db.VarChar
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model banner {
+  id         Int       @id @default(autoincrement())
+  image      String    @db.VarChar(255)
+  is_active  Boolean   @default(true)
+  created_by Int
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  users      users     @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_banner_user")
+}
