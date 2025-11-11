@@ -8,81 +8,73 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model permissions {
-  id                   Int                    @id @default(autoincrement())
-  name                 String                 @unique
-  grup                 String?                @db.VarChar
-  role_has_permissions role_has_permissions[]
-}
-
-model role_has_permissions {
-  role_id       Int
-  permission_id Int
-  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: Restrict)
-  roles         roles       @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Restrict)
-
-  @@id([role_id, permission_id])
-  @@index([permission_id])
-}
-
-model roles {
-  id                   Int                    @id @default(autoincrement())
-  name                 String                 @unique
-  role_has_permissions role_has_permissions[]
-  user_roles           user_roles[]
-}
-
-model user_roles {
-  user_id Int
-  role_id Int
-  roles   roles @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Restrict)
-  users   users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict)
-
-  @@id([user_id, role_id])
-  @@index([role_id])
-}
-
 model users {
+  id               Int                      @id @default(autoincrement())
+  namalengkap      String                   @db.VarChar(100)
+  email            String                   @db.VarChar(100)
+  tanggallahir     DateTime?                @db.Date
+  pendidikan       String?                  @db.VarChar(50)
+  alamat           String?
+  pekerjaan        String?                  @db.VarChar(50)
+  namaanak         String?                  @db.VarChar(100)
+  tanggallahiranak DateTime?                @db.Date
+  jeniskelaminanak jenis_kelamin_anak_enum?
+  beratbadan       Decimal?                 @db.Decimal(5, 2)
+  tinggibadan      Decimal?                 @db.Decimal(5, 2)
+  created_at       DateTime                 @default(now()) @db.Timestamp(6)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model hasil_total {
+  id                Int      @id @default(autoincrement())
+  user_id           Int
+  total_pengetahuan Int?     @default(0)
+  total_sikap       Int?     @default(0)
+  total_motivasi    Int?     @default(0)
+  total_skor        Int?     @default(dbgenerated("((total_pengetahuan + total_sikap) + total_motivasi)"))
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model motivasi_ibu {
   id         Int          @id @default(autoincrement())
-  nama       String
-  email      String       @unique
-  password   String
-  banner     banner[]
-  portofolio portofolio[]
-  user_roles user_roles[]
-}
-
-model portofolio {
-  id          Int       @id(map: "portfolios_pkey") @default(autoincrement())
-  name        String    @db.VarChar(255)
-  slug        String    @unique(map: "portfolios_slug_key") @db.VarChar(255)
-  image       String?   @db.VarChar(255)
-  description String?
-  created_by  Int
-  created_at  DateTime? @default(now()) @db.Timestamp(6)
-  updated_at  DateTime? @default(now()) @db.Timestamp(6)
-  type        String?   @db.VarChar
-  kategori    String?   @db.VarChar
-  users       users     @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_portofolio_user")
+  user_id    Int
+  nomor_soal Int
+  jawaban    jawaban_enum
+  poin       Int?         @default(dbgenerated("\nCASE\n    WHEN (jawaban = 'Sangat Setuju'::jawaban_enum) THEN 4\n    WHEN (jawaban = 'Setuju'::jawaban_enum) THEN 3\n    WHEN (jawaban = 'Tidak Setuju'::jawaban_enum) THEN 2\n    WHEN (jawaban = 'Sangat Tidak Setuju'::jawaban_enum) THEN 1\n    ELSE 0\nEND"))
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model tim {
-  id         Int       @id @default(autoincrement())
-  nama       String    @db.VarChar(100)
-  posisi     String    @db.VarChar(100)
-  created_at DateTime? @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
-  image      String?   @db.VarChar
+model pengetahuan_ibu {
+  id         Int                 @id @default(autoincrement())
+  user_id    Int
+  nomor_soal Int
+  jawaban    jawaban_benar_salah
+  poin       Int?                @default(dbgenerated("\nCASE\n    WHEN (jawaban = 'Benar'::jawaban_benar_salah) THEN 2\n    ELSE 1\nEND"))
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model banner {
-  id         Int       @id @default(autoincrement())
-  image      String    @db.VarChar(255)
-  is_active  Boolean   @default(true)
-  created_by Int
-  created_at DateTime? @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
-  users      users     @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_banner_user")
+model sikap_ibu {
+  id         Int          @id @default(autoincrement())
+  user_id    Int
+  nomor_soal Int
+  jawaban    jawaban_enum
+  poin       Int?         @default(dbgenerated("\nCASE\n    WHEN (jawaban = 'Sangat Setuju'::jawaban_enum) THEN 4\n    WHEN (jawaban = 'Setuju'::jawaban_enum) THEN 3\n    WHEN (jawaban = 'Tidak Setuju'::jawaban_enum) THEN 2\n    WHEN (jawaban = 'Sangat Tidak Setuju'::jawaban_enum) THEN 1\n    ELSE 0\nEND"))
+}
+
+enum jawaban_benar_salah {
+  Benar
+  Salah
+}
+
+enum jawaban_enum {
+  Sangat_Setuju       @map("Sangat Setuju")
+  Setuju
+  Tidak_Setuju        @map("Tidak Setuju")
+  Sangat_Tidak_Setuju @map("Sangat Tidak Setuju")
+}
+
+enum jenis_kelamin_anak_enum {
+  Laki_laki @map("Laki-laki")
+  Perempuan
 }
