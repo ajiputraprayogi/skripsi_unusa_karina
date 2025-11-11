@@ -30,33 +30,51 @@ export default function AuthPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Kirim data JSON ke API
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+// Kirim data JSON ke API
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const res = await fetch("/api/dummy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+  try {
+    const endpoint = isLogin ? "/dummyapi/login" : "/dummyapi/users";
+    const method = "POST";
 
-      if (!res.ok) throw new Error("Gagal mengirim data");
+    const res = await fetch(endpoint, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
 
-      const result = await res.json();
-      console.log("✅ Response:", result);
+    const result = await res.json();
 
-      // Tunggu sedikit biar smooth
-      setTimeout(() => {
-        router.push("/soal");
-      }, 1000);
-    } catch (error) {
-      console.error("Error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (!res.ok) throw new Error(result.error || "Gagal mengirim data");
+
+if (isLogin) {
+  // Simpan nama & email ke localStorage
+  localStorage.setItem(
+    "user",
+    JSON.stringify({
+      namaLengkap: formData.namaLengkap,
+      email: formData.email,
+    })
+  );
+
+  alert("Login berhasil ✅");
+  router.push("/soal");
+} else {
+  alert("Registrasi berhasil 🎉");
+  setIsLogin(true);
+}
+
+  } catch (error: any) {
+    alert(error.message || "Terjadi kesalahan");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-white to-blue-100 p-5">
