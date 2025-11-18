@@ -1,4 +1,5 @@
 import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
+import { JWT } from "next-auth/jwt"; // Import JWT secara eksplisit jika diperlukan
 
 declare module "next-auth" {
   interface Session {
@@ -6,16 +7,14 @@ declare module "next-auth" {
       id: string;
       nama: string;
       email: string;
-      roles: string[];
-      permissions: string[];
+      // ❌ roles dan permissions dihapus
     } & DefaultSession["user"];
   }
 
   interface User extends DefaultUser {
     id: string;
     nama: string;
-    roles: string[];
-    permissions: string[];
+    // ❌ roles dan permissions dihapus
   }
 }
 
@@ -24,7 +23,6 @@ declare module "next-auth/jwt" {
     id: string;
     nama: string;
     email: string;
-    roles: string[];
-    permissions: string[];
+    // ❌ roles dan permissions dihapus
   }
 }
