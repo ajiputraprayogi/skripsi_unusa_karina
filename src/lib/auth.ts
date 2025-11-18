@@ -1,79 +1,68 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+// app/api/auth/[...nextauth]/route.js atau pages/api/auth/[...nextauth].js
+import NextAuth, { NextAuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
+
+// Definisikan tipe User sederhana
+// Catatan: Interface ini hanya memastikan tipe yang dikembalikan dari authorize() benar.
+interface SimpleUser extends User {
+  id: string;
+  nama: string;
+  email: string;
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: "Email & Nama Lengkap",
       credentials: {
         email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
+        namaLengkap: { label: "Nama Lengkap", type: "text" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email dan password harus diisi");
+        if (!credentials?.email || !credentials?.namaLengkap) {
+          throw new Error("Email dan Nama Lengkap harus diisi");
         }
 
-        // Cari user
-        const user = await prisma.users.findUnique({
-          where: { email: credentials.email },
-          include: {
-            user_roles: {
-              include: {
-                roles: {
-                  include: {
-                    role_has_permissions: { include: { permissions: true } },
-                  },
-                },
-              },
-            },
+        // Cari user di tabel public.users
+        const user = await prisma.users.findFirst({
+          where: {
+            email: credentials.email,
+            namalengkap: credentials.namaLengkap, // Verifikasi Nama Lengkap
           },
         });
 
-        if (!user) throw new Error("User tidak ditemukan");
+        if (!user) {
+          throw new Error("Email atau Nama Lengkap salah");
+        }
 
-        // Verifikasi password
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) throw new Error("Password salah");
-
-        // Kumpulkan permission unik
-        const permissionsSet = new Set<string>();
-        user.user_roles.forEach((ur) => {
-          ur.roles.role_has_permissions.forEach((rp) => {
-            permissionsSet.add(rp.permissions.name);
-          });
-        });
-
+        // Kembalikan objek pengguna sederhana (tanpa roles/permissions)
         return {
-          id: user.id.toString(),
-          nama: user.nama ?? "",
+          id: user.id.toString(), // ID harus string
+          nama: user.namalengkap ?? "",
           email: user.email ?? "",
-          roles: user.user_roles.map((ur) => ur.roles.name),
-          permissions: Array.from(permissionsSet),
-        };
+        } as SimpleUser;
       },
     }),
   ],
+  // --- Konfigurasi Sesi ---
   pages: {
     signIn: "/login",
   },
   session: {
     strategy: "jwt",
     maxAge: 2 * 60 * 60, // 2 jam
-    updateAge: 15 * 60,
   },
+  // --- Callbacks Sederhana (Sudah Disesuaikan) ---
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id ?? "";
-        token.nama = user.nama ?? "";
-        token.email = user.email ?? "";
-        token.roles = user.roles ?? [];
-        token.permissions = user.permissions ?? [];
+        const simpleUser = user as SimpleUser;
+        token.id = simpleUser.id;
+        token.nama = simpleUser.nama;
+        token.email = simpleUser.email;
       }
       return token;
     },
@@ -83,16 +72,12 @@ export const authOptions: NextAuthOptions = {
           id: token.id as string,
           nama: token.nama as string,
           email: token.email as string,
-          roles: token.roles as string[],
-          permissions: token.permissions as string[],
         };
       }
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Jika ada callback URL valid → gunakan
       if (url.startsWith(baseUrl)) return url;
-      // fallback → arahkan ke dashboard
       return `${baseUrl}/backend`;
     },
   },

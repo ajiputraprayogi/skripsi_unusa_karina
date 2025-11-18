@@ -1,98 +1,122 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import bcrypt from "bcrypt";
+// Hapus: import bcrypt from "bcrypt";
+
+// Fungsi bantu untuk mengonversi string YYYY-MM-DD ke Date object atau null
+const safeDate = (dateString) => {
+    if (dateString) {
+        const date = new Date(dateString);
+        return isNaN(date.getTime()) ? null : date;
+    }
+    return null;
+};
+
+// Fungsi untuk konversi Date object ke string YYYY-MM-DD (untuk input date)
+const formatDateToISO = (date) => {
+    if (date instanceof Date && !isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0]; 
+    }
+    return null;
+};
 
 // ============================
-// PUT untuk update user
+// PUT untuk update user (FINAL TANPA PASSWORD)
 // ============================
 export async function PUT(request, context) {
-  try {
-    const id = Number(context.params.id);
-    const body = await request.json();
-    const { nama, email, roleId, password } = body;
+    try {
+        const id = Number(context.params.id);
+        const body = await request.json();
+        
+        // Hapus 'password' dari destructuring
+        const { 
+            namalengkap, 
+            email, 
+            tanggallahir, 
+            pendidikan, 
+            alamat, 
+            pekerjaan, 
+            namaanak, 
+            tanggallahiranak, 
+            jeniskelaminanak 
+        } = body;
 
-    if (!nama || !email || !roleId) {
-      return NextResponse.json(
-        { error: "Nama, email dan roleId wajib diisi" },
-        { status: 400 }
-      );
+        if (!namalengkap || !email) {
+            return NextResponse.json(
+                { error: "Nama lengkap dan email wajib diisi" },
+                { status: 400 }
+            );
+        }
+
+        // Data user yang akan diupdate
+        const dataToUpdate = { 
+            namalengkap, 
+            email,
+            // Data Pribadi
+            tanggallahir: safeDate(tanggallahir),
+            pendidikan: pendidikan || null,
+            alamat: alamat || null,
+            pekerjaan: pekerjaan || null,
+            // Data Anak
+            namaanak: namaanak || null,
+            tanggallahiranak: safeDate(tanggallahiranak),
+            jeniskelaminanak: namaanak ? jeniskelaminanak : null,
+        };
+
+        // Hapus: Logika hashing dan update password
+
+        // Update data user
+        const updatedUser = await prisma.users.update({
+            where: { id },
+            data: dataToUpdate,
+        });
+
+        return NextResponse.json(updatedUser, { status: 200 });
+    } catch (error) {
+        console.error("Error updating user:", error);
+        return NextResponse.json(
+            { error: "Gagal mengupdate user" },
+            { status: 500 }
+        );
     }
-
-    // Data user yang akan diupdate
-    const dataToUpdate = { nama, email };
-
-    if (password && password.trim() !== "") {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      dataToUpdate.password = hashedPassword;
-    }
-
-    // Update data user
-    const updatedUser = await prisma.users.update({
-      where: { id },
-      data: dataToUpdate,
-    });
-
-    // Update role user di tabel pivot user_roles
-    await prisma.user_roles.deleteMany({
-      where: { user_id: id },
-    });
-
-    await prisma.user_roles.create({
-      data: {
-        user_id: id,
-        role_id: Number(roleId),
-      },
-    });
-
-    return NextResponse.json(updatedUser, { status: 200 });
-  } catch (error) {
-    console.error("Error updating user:", error);
-    return NextResponse.json(
-      { error: "Gagal mengupdate user" },
-      { status: 500 }
-    );
-  }
 }
 
+// -------------------------------------------------------------
+
 // ============================
-// GET untuk ambil detail user
+// GET untuk ambil detail user (TIDAK BERUBAH)
 // ============================
 export async function GET(request, context) {
-  try {
-    const id = Number(context.params.id);
+    try {
+        const id = Number(context.params.id);
 
-    const user = await prisma.users.findUnique({
-      where: { id },
-      include: {
-        user_roles: {
-          include: {
-            roles: true,
-          },
-        },
-      },
-    });
+        const user = await prisma.users.findUnique({
+            where: { id },
+        });
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "User tidak ditemukan" },
-        { status: 404 }
-      );
+        if (!user) {
+            return NextResponse.json(
+                { error: "User tidak ditemukan" },
+                { status: 404 }
+            );
+        }
+        
+        return NextResponse.json({
+            id: user.id,
+            namalengkap: user.namalengkap,
+            email: user.email,
+            tanggallahir: formatDateToISO(user.tanggallahir),
+            pendidikan: user.pendidikan,
+            alamat: user.alamat,
+            pekerjaan: user.pekerjaan,
+            namaanak: user.namaanak,
+            tanggallahiranak: formatDateToISO(user.tanggallahiranak),
+            jeniskelaminanak: user.jeniskelaminanak,
+        });
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        return NextResponse.json(
+            { error: "Gagal mengambil data user" },
+            { status: 500 }
+        );
     }
-
-    const roleId = user.user_roles[0]?.role_id ?? null;
-    console.log(`Role ID untuk user ${id}:`, roleId);
-
-    return NextResponse.json({
-      id: user.id,
-      nama: user.nama,
-      email: user.email,
-      roleId, // single role
-    });
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    return NextResponse.json(
-      { error: "Gagal mengambil data user" },
-      { status: 500 }
-    );
-  }
 }

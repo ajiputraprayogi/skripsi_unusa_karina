@@ -11,7 +11,7 @@ datasource db {
 model users {
   id               Int                      @id @default(autoincrement())
   namalengkap      String                   @db.VarChar(100)
-  email            String                   @db.VarChar(100)
+  email            String                   @unique @db.VarChar(100)
   tanggallahir     DateTime?                @db.Date
   pendidikan       String?                  @db.VarChar(50)
   alamat           String?
@@ -22,44 +22,32 @@ model users {
   beratbadan       Decimal?                 @db.Decimal(5, 2)
   tinggibadan      Decimal?                 @db.Decimal(5, 2)
   created_at       DateTime                 @default(now()) @db.Timestamp(6)
+  responses        responses[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model hasil_total {
-  id                Int      @id @default(autoincrement())
-  user_id           Int
-  total_pengetahuan Int?     @default(0)
-  total_sikap       Int?     @default(0)
-  total_motivasi    Int?     @default(0)
-  total_skor        Int?     @default(dbgenerated("((total_pengetahuan + total_sikap) + total_motivasi)"))
-  created_at        DateTime @default(now()) @db.Timestamp(6)
+model questions {
+  id            Int           @id @default(autoincrement())
+  category      String        @db.VarChar(50)
+  question_text String
+  question_type question_type
+  created_at    DateTime?     @default(now()) @db.Timestamptz(6)
+  responses     responses[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model motivasi_ibu {
-  id         Int          @id @default(autoincrement())
-  user_id    Int
-  nomor_soal Int
-  jawaban    jawaban_enum
-  poin       Int?         @default(dbgenerated("\nCASE\n    WHEN (jawaban = 'Sangat Setuju'::jawaban_enum) THEN 4\n    WHEN (jawaban = 'Setuju'::jawaban_enum) THEN 3\n    WHEN (jawaban = 'Tidak Setuju'::jawaban_enum) THEN 2\n    WHEN (jawaban = 'Sangat Tidak Setuju'::jawaban_enum) THEN 1\n    ELSE 0\nEND"))
-}
+model responses {
+  id                  Int       @id @default(autoincrement())
+  user_id             Int
+  question_id         Int
+  response_session_id String    @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  answer_value        String    @db.VarChar(50)
+  calculated_score    Int
+  submitted_at        DateTime  @default(now()) @db.Timestamp(6)
+  questions           questions @relation(fields: [question_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users               users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model pengetahuan_ibu {
-  id         Int                 @id @default(autoincrement())
-  user_id    Int
-  nomor_soal Int
-  jawaban    jawaban_benar_salah
-  poin       Int?                @default(dbgenerated("\nCASE\n    WHEN (jawaban = 'Benar'::jawaban_benar_salah) THEN 2\n    ELSE 1\nEND"))
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model sikap_ibu {
-  id         Int          @id @default(autoincrement())
-  user_id    Int
-  nomor_soal Int
-  jawaban    jawaban_enum
-  poin       Int?         @default(dbgenerated("\nCASE\n    WHEN (jawaban = 'Sangat Setuju'::jawaban_enum) THEN 4\n    WHEN (jawaban = 'Setuju'::jawaban_enum) THEN 3\n    WHEN (jawaban = 'Tidak Setuju'::jawaban_enum) THEN 2\n    WHEN (jawaban = 'Sangat Tidak Setuju'::jawaban_enum) THEN 1\n    ELSE 0\nEND"))
+  @@index([user_id, response_session_id], map: "idx_responses_user_session")
 }
 
 enum jawaban_benar_salah {
@@ -77,4 +65,10 @@ enum jawaban_enum {
 enum jenis_kelamin_anak_enum {
   Laki_laki @map("Laki-laki")
   Perempuan
+}
+
+enum question_type {
+  benar_salah
+  skala_positif
+  skala_negatif
 }
