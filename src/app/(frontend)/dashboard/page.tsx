@@ -16,7 +16,7 @@ export default function Dashboard() {
   }
 
   // Ambil level dari session
-  const level = session?.user?.level;
+  const level = session?.user?.id;
 
   // Sudah login
   return (

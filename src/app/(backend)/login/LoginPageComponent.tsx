@@ -2,29 +2,28 @@
 
 import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 export default function LoginPageComponent() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  // State diubah untuk menyimpan namaLengkap (sebagai pengganti password)
   const [email, setEmail] = useState("");
-  const [namaLengkap, setNamaLengkap] = useState(""); // <-- Diubah
+  const [namaLengkap, setNamaLengkap] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const callbackUrl = searchParams.get("callbackUrl") || "/backend";
-
+  // Jika sudah login → arahkan sesuai level
   useEffect(() => {
-    document.title = "Login | Admin Panel";
-  }, []);
-
-  // Logika pengalihan tetap sama
-  useEffect(() => {
-    if (status === "authenticated") router.replace(callbackUrl);
-  }, [status, callbackUrl, router]);
+    if (status === "authenticated" && session?.user?.level) {
+      if (session.user.level === "admin") {
+        router.replace("/backend");
+      } else {
+        router.replace("/quiz");
+      }
+    }
+  }, [status, session, router]);
 
   if (status === "loading" || status === "authenticated") {
     return (
@@ -39,88 +38,83 @@ export default function LoginPageComponent() {
     setLoading(true);
     setErrorMessage(null);
 
-    try {
-      const res = await signIn("credentials", {
-        email,
-        // Mengirim namaLengkap sebagai kredensial "password"
-        // Catatan: NextAuth secara default mencari 'username' dan 'password'.
-        // Jika Anda ingin NextAuth menerima 'namaLengkap',
-        // Anda harus mengonfigurasi properti 'credentials' di NextAuth
-        // untuk menerima 'namaLengkap' dan 'email'.
-        namaLengkap, // <-- Diubah: Mengirimkan namaLengkap sebagai kredensial
-        redirect: false,
-        callbackUrl,
-      });
+    const res = await signIn("credentials", {
+      email,
+      namaLengkap,
+      redirect: false,
+    });
 
-      if (res?.ok) router.push(res.url || callbackUrl);
-      else {
-        // Pesan error diperbarui
-        setErrorMessage(res?.error || "Login gagal: nama lengkap atau email salah");
-        setLoading(false);
-      }
-    } catch (err) {
-      console.error("Unexpected login error:", err);
-      setErrorMessage("Terjadi error saat login.");
+    if (res?.ok) {
+      // Ambil session baru
+      const newSession = await fetch("/api/auth/session").then((r) => r.json());
+      const level = newSession?.user?.level;
+
+      if (level === "admin") router.push("/backend");
+      else router.push("/quiz");
+    } else {
+      setErrorMessage(res?.error || "Login gagal: nama lengkap atau email salah");
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-lg bg-white p-8 shadow-md"
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-white to-blue-100 p-5">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-full max-w-md bg-white/70 backdrop-blur-md shadow-lg rounded-2xl p-8 border border-gray-200"
       >
-        <h2 className="mb-6 text-center text-2xl font-semibold text-gray-800">
-          Login
-        </h2>
+        <h1 className="text-3xl font-semibold text-gray-800 mb-6 text-center">
+          Selamat Datang
+        </h1>
 
         {errorMessage && (
-          <div className="mb-4 rounded bg-red-100 p-3 text-center text-red-700">
+          <div className="mb-4 rounded-lg bg-red-100 p-3 text-center text-red-700">
             {errorMessage}
           </div>
         )}
 
-        {/* Kolom Input Email (Tidak Berubah) */}
-        <label className="block mb-2 font-medium text-gray-600" htmlFor="email">
-          Email
-        </label>
-        <input
-          id="email"
-          type="email"
-          placeholder="Masukkan email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          disabled={loading}
-          className="mb-4 w-full rounded border border-gray-300 p-3 focus:border-blue-500 focus:ring focus:ring-blue-200"
-        />
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <div>
+            <label className="text-sm text-gray-600">Nama Lengkap</label>
+            <input
+              type="text"
+              placeholder="Masukkan nama lengkap"
+              value={namaLengkap}
+              onChange={(e) => setNamaLengkap(e.target.value)}
+              required
+              disabled={loading}
+              className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 bg-white"
+            />
+          </div>
 
-        {/* Kolom Input Nama Lengkap (Menggantikan Password) */}
-        <label className="block mb-2 font-medium text-gray-600" htmlFor="namaLengkap">
-          Nama Lengkap
-        </label>
-        <input
-          id="namaLengkap"
-          type="text" // <-- Diubah menjadi type="text"
-          placeholder="Masukkan nama lengkap"
-          value={namaLengkap}
-          onChange={(e) => setNamaLengkap(e.target.value)} // <-- Diubah
-          required
-          disabled={loading}
-          className="mb-6 w-full rounded border border-gray-300 p-3 focus:border-blue-500 focus:ring focus:ring-blue-200"
-        />
+          <div>
+            <label className="text-sm text-gray-600">Email</label>
+            <input
+              type="email"
+              placeholder="_@gmail.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={loading}
+              className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 bg-white"
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full rounded bg-blue-600 py-3 text-white transition-colors duration-300 ${
-            loading ? "cursor-not-allowed bg-gray-400" : "hover:bg-blue-700"
-          }`}
-        >
-          {loading ? "Loading..." : "Login"}
-        </button>
-      </form>
-    </div>
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            type="submit"
+            disabled={loading}
+            className={`mt-4 ${
+              loading ? "bg-pink-300" : "bg-pink-500 hover:bg-pink-600"
+            } text-white font-medium py-3 rounded-lg transition`}
+          >
+            {loading ? "Memproses..." : "Login"}
+          </motion.button>
+        </form>
+      </motion.div>
+    </section>
   );
 }

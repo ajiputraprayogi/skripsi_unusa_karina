@@ -10,7 +10,7 @@ type Option = {
 
 type ParsedAnswer = {
   options?: Option[];
-  correct?: string;
+  answer?: string;
 };
 
 type Question = {
@@ -25,8 +25,9 @@ export default function KuisionerPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(false);
+  const [phase, setPhase] = useState(0); // fase 0-3
 
-  const USER_ID = 1; // ← nanti ganti dengan user actual (JWT / session)
+  const USER_ID = 1; // nanti diganti pakai JWT/session
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,52 +42,40 @@ export default function KuisionerPage() {
     setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  // === HITUNG NILAI PER PERTANYAAN ===
-  const calculateScore = (question: Question, answer: string) => {
-    const parsed: ParsedAnswer = JSON.parse(question.correct_answer);
+  const questionsPerPhase = Math.ceil(questions.length / 4);
+  const currentQuestions = questions.slice(
+    phase * questionsPerPhase,
+    (phase + 1) * questionsPerPhase
+  );
 
-    if (question.question_type === "benar_salah") {
-      const correct = parsed.correct || "";
-      return answer === correct ? 1 : 0;
-    }
-
-    if (parsed.options) {
-      const opt = parsed.options.find((o) => o.text === answer);
-      return opt ? Number(opt.point) : 0;
-    }
-
-    return 0;
+  const handleNextPhase = () => {
+    if (phase < 3) setPhase(phase + 1);
   };
 
-  // === SUBMIT TO API /responses ===
+  const handlePrevPhase = () => {
+    if (phase > 0) setPhase(phase - 1);
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
 
-    const payload = Object.entries(answers).map(([qId, ans]) => {
-      const q = questions.find((x) => x.id === Number(qId));
-      if (!q) return null;
+    // Format POST sesuai GET JSON
+    const payload = Object.entries(answers).map(([qId, ans]) => ({
+      userId: USER_ID,
+      questionId: Number(qId),
+      answerValue: ans,
+    }));
 
-      return {
-        user_id: USER_ID,
-        question_id: q.id,
-        answer_value: ans,
-        calculated_score: calculateScore(q, ans),
-      };
-    }).filter(Boolean);
-
-    const res = await fetch("/api/responses", {
+    const res = await fetch("/api/questions/post", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ responses: payload }),
+      body: JSON.stringify(payload),
     });
 
     setLoading(false);
 
-    if (res.ok) {
-      alert("Jawaban berhasil dikirim!");
-    } else {
-      alert("Gagal submit jawaban.");
-    }
+    if (res.ok) alert("Jawaban berhasil dikirim!");
+    else alert("Gagal submit jawaban.");
   };
 
   return (
@@ -100,7 +89,7 @@ export default function KuisionerPage() {
       </motion.h1>
 
       <div className="w-full max-w-3xl flex flex-col gap-6">
-        {questions.map((q, i) => {
+        {currentQuestions.map((q, i) => {
           const parsed: ParsedAnswer = JSON.parse(q.correct_answer);
 
           return (
@@ -117,7 +106,7 @@ export default function KuisionerPage() {
 
               <p className="text-lg font-medium mb-4">{q.question_text}</p>
 
-              {/* === BENAR / SALAH === */}
+              {/* BENAR / SALAH */}
               {q.question_type === "benar_salah" && (
                 <div className="flex gap-4">
                   {["Benar", "Salah"].map((item) => (
@@ -137,11 +126,11 @@ export default function KuisionerPage() {
                 </div>
               )}
 
-              {/* === SKALA === */}
+              {/* SKALA */}
               {(q.question_type === "skala_positif" ||
                 q.question_type === "skala_negatif") && (
                 <div className="grid grid-cols-2 gap-3 mt-2">
-                  {parsed.options?.map((opt: Option, idx: number) => (
+                  {parsed.options?.map((opt, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleSelect(q.id, opt.text)}
@@ -162,13 +151,35 @@ export default function KuisionerPage() {
         })}
       </div>
 
-      <motion.button
-        onClick={handleSubmit}
-        whileTap={{ scale: 0.95 }}
-        className="mt-10 bg-black text-white px-6 py-3 rounded-xl shadow hover:bg-gray-800 transition"
-      >
-        {loading ? "Mengirim..." : "Submit Jawaban"}
-      </motion.button>
+      <div className="flex gap-4 mt-10">
+        {phase > 0 && (
+          <motion.button
+            onClick={handlePrevPhase}
+            whileTap={{ scale: 0.95 }}
+            className="bg-gray-300 text-black px-6 py-3 rounded-xl shadow hover:bg-gray-400 transition"
+          >
+            Sebelumnya
+          </motion.button>
+        )}
+
+        {phase < 3 ? (
+          <motion.button
+            onClick={handleNextPhase}
+            whileTap={{ scale: 0.95 }}
+            className="bg-black text-white px-6 py-3 rounded-xl shadow hover:bg-gray-800 transition"
+          >
+            Selanjutnya
+          </motion.button>
+        ) : (
+          <motion.button
+            onClick={handleSubmit}
+            whileTap={{ scale: 0.95 }}
+            className="bg-green-600 text-white px-6 py-3 rounded-xl shadow hover:bg-green-700 transition"
+          >
+            {loading ? "Mengirim..." : "Submit Jawaban"}
+          </motion.button>
+        )}
+      </div>
     </div>
   );
 }
