@@ -7,14 +7,14 @@ declare module "next-auth" {
       id: string;
       nama: string;
       email: string;
-      // ❌ roles dan permissions dihapus
+      level: string; // 👈 tambahkan
     } & DefaultSession["user"];
   }
 
   interface User extends DefaultUser {
     id: string;
     nama: string;
-    // ❌ roles dan permissions dihapus
+    level: string; // 👈 tambahkan
   }
 }
 
@@ -23,6 +23,6 @@ declare module "next-auth/jwt" {
     id: string;
     nama: string;
     email: string;
-    // ❌ roles dan permissions dihapus
+    level: string; // 👈 tambahkan
   }
 }
