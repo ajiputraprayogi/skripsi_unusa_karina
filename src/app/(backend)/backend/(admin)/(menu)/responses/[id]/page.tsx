@@ -17,7 +17,6 @@ type QuestionType = 'benar_salah' | 'skala_positif' | 'skala_negatif' | string;
 type DetailResponse = {
     id: number;
     answer_value: string;
-    // calculated_score: number; // Tidak digunakan lagi untuk tampilan skor
     submitted_at: string;
     response_session_id: string;
     questions: {
@@ -44,19 +43,21 @@ interface UserResponseDetailProps {
     }
 }
 
-// --- FUNGSI HELPER BARU: Menghitung Skor Real-Time & Kunci Jawaban ---
+// --- FUNGSI HELPER: Menghitung Skor Real-Time & Kunci Jawaban/Opsi ---
 
 /**
- * Menghitung skor dan menentukan kunci jawaban berdasarkan tipe soal.
- * @param response Data respons dari API.
- * @returns Objek yang berisi skor yang dihitung, kunci jawaban, dan status tampilan.
+ * Menghitung skor dan menentukan tampilan kunci jawaban/opsi berdasarkan tipe soal.
+ * Sekarang mengimplementasikan tampilan grid/card untuk Skala yang mirip template edit.
+ * * @param response Data respons dari API.
+ * @returns Objek yang berisi skor yang dihitung, tampilan kunci jawaban/opsi (JSX), dan status tampilan.
  */
 function calculateScoreAndCorrectness(response: DetailResponse) {
     const { question_type, correct_answer } = response.questions;
     const userAnswer = response.answer_value;
 
     let calculatedScore: number = 0;
-    let correctAnswerValue: string = "";
+    // Tipe data untuk tampilan kunci: string (Benar/Salah) atau JSX.Element (Skala)
+    let correctAnswerDisplay: string | React.ReactNode = ""; 
     let statusText: string = "N/A";
     let statusClass: string = "bg-gray-100 text-gray-700";
 
@@ -64,11 +65,14 @@ function calculateScoreAndCorrectness(response: DetailResponse) {
         const parsedCorrect = JSON.parse(correct_answer);
 
         if (question_type === 'benar_salah') {
-            correctAnswerValue = parsedCorrect.answer;
+            const correctAnswerValue = parsedCorrect.answer;
             const isCorrect = userAnswer.toLowerCase() === correctAnswerValue.toLowerCase();
 
+            correctAnswerDisplay = (
+                <span className="font-bold text-lg">{correctAnswerValue}</span>
+            );
             if (isCorrect) {
-                calculatedScore = 1; // Asumsi skor Benar/Salah adalah 1
+                calculatedScore = 1; 
                 statusText = "JAWABAN TEPAT";
                 statusClass = "bg-green-100 text-green-700";
             } else {
@@ -80,34 +84,53 @@ function calculateScoreAndCorrectness(response: DetailResponse) {
         } else if (question_type.startsWith('skala')) {
             const options = parsedCorrect.options as { text: string, point: number }[];
             
-            // Mencari skor berdasarkan teks jawaban pengguna
+            // 1. Hitung Skor Real-Time (Mencari poin dari teks jawaban pengguna)
             const selectedOption = options.find(opt => opt.text === userAnswer);
-            
-            if (selectedOption) {
-                calculatedScore = selectedOption.point;
-            } else {
-                calculatedScore = 0; // Jika jawaban tidak cocok (misalnya tidak dijawab)
-            }
+            calculatedScore = selectedOption ? selectedOption.point : 0; 
 
-            // Menentukan Kunci Jawaban (Opsi Skor Tertinggi)
-            const maxPoint = Math.max(...options.map(opt => opt.point));
-            correctAnswerValue = options.find(opt => opt.point === maxPoint)?.text || 'N/A';
+            // 2. Tentukan Tampilan Kunci/Opsi (Semua opsi dengan bobot skornya - MIRIP TEMPLATE EDIT)
+            correctAnswerDisplay = (
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                    {options.map((option, index) => {
+                        const isUserAnswer = option.text === userAnswer;
+                        const bgColor = isUserAnswer ? 'bg-blue-100 dark:bg-blue-900/50 border-blue-400' : 'bg-white dark:bg-gray-700/50 border-gray-200';
+                        const textColor = option.point > 2 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+
+                        return (
+                            <div 
+                                key={index} 
+                                className={`flex items-center justify-between p-2 border rounded-md ${bgColor} text-sm`}
+                            >
+                                <span className={`font-medium ${isUserAnswer ? 'text-blue-800 dark:text-blue-100' : 'text-gray-900 dark:text-white'}`}>
+                                    {option.text} 
+                                </span>
+                                <span className={`text-sm font-bold ${textColor}`}>
+                                    ({option.point} poin)
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
             
-            // Menentukan Tampilan Status (Skor eksplisit)
+            // 3. Tentukan Tampilan Status (Skor eksplisit)
             statusText = `SKOR: ${calculatedScore}`;
             if (calculatedScore >= 3) {
-                 statusClass = "bg-blue-100 text-blue-700"; // Skor tinggi
+                 statusClass = "bg-blue-100 text-blue-700"; 
             } else if (calculatedScore >= 1) {
-                statusClass = "bg-yellow-100 text-yellow-700"; // Skor rendah/netral
-            } 
+                statusClass = "bg-yellow-100 text-yellow-700"; 
+            } else {
+                statusClass = "bg-gray-100 text-gray-700";
+            }
         } else {
-            // Tipe soal lain, anggap skor 0 atau perlu logika khusus
             calculatedScore = 0;
             statusText = "TIPE SOAL TIDAK DIKENAL";
+            correctAnswerDisplay = "N/A";
+            statusClass = "bg-gray-200 text-gray-800";
         }
 
     } catch (e) {
-        correctAnswerValue = 'Gagal Parsing Kunci';
+        correctAnswerDisplay = 'Gagal Parsing Kunci';
         calculatedScore = 0;
         statusText = 'DATA ERROR';
         statusClass = 'bg-red-500 text-white';
@@ -119,7 +142,7 @@ function calculateScoreAndCorrectness(response: DetailResponse) {
         </span>
     );
     
-    return { calculatedScore, correctAnswerValue, display };
+    return { calculatedScore, correctAnswerDisplay, display }; 
 }
 
 const formatQuestionType = (type: string) => {
@@ -149,8 +172,6 @@ function UserResponseDetailClient({ params }: UserResponseDetailProps) {
         setLoading(true);
         setError(null);
         try {
-            // NOTE: API masih mengirimkan calculated_score dari DB, 
-            // tapi kita akan mengabaikannya di rendering map.
             const res = await fetch(`/api/backend/responses/user/${userId}`, { cache: "no-store" }); 
             
             if (!res.ok) {
@@ -170,7 +191,6 @@ function UserResponseDetailClient({ params }: UserResponseDetailProps) {
     }
     
     if (loading) { 
-        // ... (Skeleton loading tidak berubah)
         return (
             <>
                 <PageBreadcrumb pageTitle="Detail Respons Pengguna" />
@@ -182,7 +202,6 @@ function UserResponseDetailClient({ params }: UserResponseDetailProps) {
     }
     
     if (error) {
-        // ... (Error handling tidak berubah)
         return (
              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded m-6" role="alert">
                 <strong className="font-bold">Error!</strong>
@@ -200,7 +219,7 @@ function UserResponseDetailClient({ params }: UserResponseDetailProps) {
             
             <ComponentCard title={`Detail Respons: ${userDetail?.namalengkap || `User ID ${userId}`}`}>
                 
-                {/* Info Pengguna (Tidak Berubah) */}
+                {/* Info Pengguna */}
                 <div className="mb-6 space-y-2 p-3 border rounded-lg bg-gray-50 dark:bg-white/[0.05]">
                     <p className="text-theme-sm dark:text-gray-300">
                         <strong>Nama Lengkap:</strong> {userDetail?.namalengkap || 'N/A'}
@@ -222,8 +241,13 @@ function UserResponseDetailClient({ params }: UserResponseDetailProps) {
                     ) : (
                         responses.map((response, index) => {
                             // Menggunakan fungsi calculateScoreAndCorrectness untuk mendapatkan skor dan status terbaru
-                            const { calculatedScore, correctAnswerValue, display: correctnessDisplay } = calculateScoreAndCorrectness(response);
+                            const { calculatedScore, correctAnswerDisplay, display: correctnessDisplay } = calculateScoreAndCorrectness(response);
                             
+                            // Menentukan Judul Bagian Kunci Jawaban/Opsi
+                            const keyTitle = response.questions.question_type === 'benar_salah' 
+                                ? 'Kunci Jawaban' 
+                                : 'Opsi Jawaban & Bobot Skor';
+
                             return (
                                 <div 
                                     key={response.id} 
@@ -247,11 +271,13 @@ function UserResponseDetailClient({ params }: UserResponseDetailProps) {
                                         </p>
                                     </div>
 
-                                    {/* Bagian Kunci Jawaban (Kunci) */}
+                                    {/* Bagian Kunci Jawaban / Opsi Bobot (Disesuaikan untuk Skala) */}
                                     <div className="mb-4 p-3 border border-dashed border-gray-300 rounded-md">
-                                        <p className="font-medium text-gray-700 dark:text-gray-300 mb-1">Kunci Jawaban:</p>
-                                        <div className="text-green-700 dark:text-green-300 font-bold">
-                                            {correctAnswerValue}
+                                        <p className="font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            {keyTitle}:
+                                        </p>
+                                        <div className="text-gray-900 dark:text-gray-200 font-normal">
+                                            {correctAnswerDisplay} 
                                         </div>
                                     </div>
 
