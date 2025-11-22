@@ -22,6 +22,7 @@ model users {
   beratbadan       Decimal?                 @db.Decimal(5, 2)
   tinggibadan      Decimal?                 @db.Decimal(5, 2)
   created_at       DateTime                 @default(now()) @db.Timestamp(6)
+  level            String?                  @default("User") @db.VarChar
   responses        responses[]
 }
 
