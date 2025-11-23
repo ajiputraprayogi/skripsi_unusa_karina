@@ -36,7 +36,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   setLoading(true);
 
   try {
-    const endpoint = isLogin ? "/dummyapi/login" : "/dummyapi/users";
+    const endpoint = isLogin ? "/api/dummy/" : "/api/dummy/";
     const method = "POST";
 
     const res = await fetch(endpoint, {
