@@ -1,308 +1,168 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-export default function AuthPage() {
-  const router = useRouter();
-  const [isLogin, setIsLogin] = useState(true);
-  const [loading, setLoading] = useState(false);
-
-  const [formData, setFormData] = useState({
-    namaLengkap: "",
-    email: "",
-    tanggalLahir: "",
-    pendidikan: "",
-    alamat: "",
-    pekerjaan: "",
-    namaAnak: "",
-    tanggalLahirAnak: "",
-    jenisKelaminAnak: "",
-    beratBadan: "",
-    tinggiBadan: "",
-  });
-
-  // Handle input
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-// Kirim data JSON ke API
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-
-  try {
-    const endpoint = isLogin ? "/api/dummy/" : "/api/dummy/";
-    const method = "POST";
-
-    const res = await fetch(endpoint, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-
-    const result = await res.json();
-
-    if (!res.ok) throw new Error(result.error || "Gagal mengirim data");
-
-if (isLogin) {
-  // Simpan nama & email ke localStorage
-  localStorage.setItem(
-    "user",
-    JSON.stringify({
-      namaLengkap: formData.namaLengkap,
-      email: formData.email,
-    })
-  );
-
-  alert("Login berhasil ✅");
-  router.push("/soal");
-} else {
-  alert("Registrasi berhasil 🎉");
-  setIsLogin(true);
-}
-
-  } catch (error: any) {
-    alert(error.message || "Terjadi kesalahan");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
-
+export default function HomePage() {
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-white to-blue-100 p-5">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full max-w-md bg-white/70 backdrop-blur-md shadow-lg rounded-2xl p-8 border border-gray-200"
-      >
-        {/* Title */}
-        <h1 className="text-3xl font-semibold text-gray-800 mb-6 text-center">
-          {isLogin ? "Selamat Datang" : "Daftar Yuk"}
-        </h1>
+    <main className="min-h-screen w-full bg-white text-gray-800">
 
-        {/* Form */}
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          {isLogin ? (
-            <>
-              <div>
-                <label className="text-sm text-gray-600">Nama Lengkap</label>
-                <input
-                  name="namaLengkap"
-                  type="text"
-                  placeholder="Masukkan nama lengkap"
-                  value={formData.namaLengkap}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
+      {/* HERO */}
+      <section className="relative w-full px-6 md:px-14 py-24 overflow-hidden">
 
-              <div>
-                <label className="text-sm text-gray-600">Email</label>
-                <input
-                  name="email"
-                  type="email"
-                  placeholder="_@gmail.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <div>
-                <label className="text-sm text-gray-600">Nama Lengkap</label>
-                <input
-                  name="namaLengkap"
-                  type="text"
-                  placeholder="Nama Lengkap"
-                  value={formData.namaLengkap}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
+        {/* Soft colorful floating bubbles */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.25 }}
+          className="absolute top-10 left-10 w-40 h-40 rounded-full bg-pink-200 blur-2xl"
+        />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.25 }}
+          className="absolute bottom-10 right-10 w-56 h-56 rounded-full bg-purple-200 blur-3xl"
+        />
 
-              <div>
-                <label className="text-sm text-gray-600">Email</label>
-                <input
-                  name="email"
-                  type="email"
-                  placeholder="email@gmail.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Tanggal Lahir</label>
-                <input
-                  name="tanggalLahir"
-                  type="date"
-                  value={formData.tanggalLahir}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Pendidikan Terakhir</label>
-                <input
-                  name="pendidikan"
-                  type="text"
-                  placeholder="SMA / S1 / D3 / dll"
-                  value={formData.pendidikan}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Alamat</label>
-                <textarea
-                  name="alamat"
-                  placeholder="Masukkan alamat lengkap"
-                  value={formData.alamat}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Pekerjaan</label>
-                <input
-                  name="pekerjaan"
-                  type="text"
-                  placeholder="Pekerjaan"
-                  value={formData.pekerjaan}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Nama Lengkap Anak</label>
-                <input
-                  name="namaAnak"
-                  type="text"
-                  placeholder="Nama Anak"
-                  value={formData.namaAnak}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Tanggal Lahir Anak</label>
-                <input
-                  name="tanggalLahirAnak"
-                  type="date"
-                  value={formData.tanggalLahirAnak}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Jenis Kelamin Anak</label>
-                <select
-                  name="jenisKelaminAnak"
-                  value={formData.jenisKelaminAnak}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-pink-400"
-                >
-                  <option value="">Pilih Jenis Kelamin</option>
-                  <option value="Laki-laki">Laki-laki</option>
-                  <option value="Perempuan">Perempuan</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Berat Badan (kg)</label>
-                <input
-                  name="beratBadan"
-                  type="number"
-                  placeholder="contoh: 25"
-                  value={formData.beratBadan}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-gray-600">Tinggi Badan (cm)</label>
-                <input
-                  name="tinggiBadan"
-                  type="number"
-                  placeholder="contoh: 120"
-                  value={formData.tinggiBadan}
-                  onChange={handleChange}
-                  required
-                  className="w-full mt-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400"
-                />
-              </div>
-            </>
-          )}
-
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            type="submit"
-            disabled={loading}
-            className={`mt-4 ${
-              loading ? "bg-pink-300" : "bg-pink-500 hover:bg-pink-600"
-            } text-white font-medium py-3 rounded-lg transition`}
+        <div className="grid md:grid-cols-2 gap-12 relative z-10 items-center">
+          
+          {/* Text Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-7"
           >
-            {loading ? "Mengirim..." : isLogin ? "Login" : "Daftar"}
-          </motion.button>
-        </form>
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight tracking-tight">
+              Belajar Jadi Seru  
+              <span className="text-pink-500"> untuk Ibu & Anak</span>
+            </h1>
 
-        {/* Switch Mode */}
-        <p className="text-center text-gray-600 text-sm mt-6">
-          {isLogin ? (
-            <>
-              Belum punya akun?{" "}
-              <button
-                onClick={() => setIsLogin(false)}
-                className="text-pink-500 hover:underline"
-              >
-                Daftar disini
-              </button>
-            </>
-          ) : (
-            <>
-              Sudah punya akun?{" "}
-              <button
-                onClick={() => setIsLogin(true)}
-                className="text-pink-500 hover:underline"
-              >
-                Login
-              </button>
-            </>
-          )}
-        </p>
-      </motion.div>
-    </section>
+            <p className="text-gray-600 text-lg md:text-xl leading-relaxed">
+              Materi interaktif, aktivitas kreatif, dan panduan modern untuk 
+              mendampingi tumbuh kembang anak secara menyenangkan.
+            </p>
+
+            <Link href={"/login"}>
+            <motion.button
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-7 py-4 bg-pink-500 rounded-2xl text-white font-semibold text-lg shadow-md"
+            >
+              Mulai Belajar
+            </motion.button>
+            </Link>
+          </motion.div>
+
+          {/* Hero Image */}
+          <motion.img
+            src="/hero1.jpg"
+            alt="ibu dan anak"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7 }}
+            className="w-full max-w-lg mx-auto rounded-3xl shadow-lg object-cover"
+          />
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="px-6 md:px-14 py-20 bg-gradient-to-b from-gray-50 to-white">
+        <h2 className="text-4xl font-bold text-center mb-14">
+          Mulai Dari Mana Hari Ini?
+        </h2>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            {
+              title: "Materi Parenting",
+              desc: "Tips modern untuk menghadapi tahap perkembangan anak.",
+              color: "bg-pink-100",
+              text: "text-pink-700"
+            },
+            {
+              title: "Aktivitas Interaktif",
+              desc: "Belajar sambil bermain yang merangsang kreativitas.",
+              color: "bg-yellow-100",
+              text: "text-yellow-700"
+            },
+            {
+              title: "Tips Kesehatan",
+              desc: "Informasi kesehatan anak dengan gaya mudah dipahami.",
+              color: "bg-blue-100",
+              text: "text-blue-700"
+            },
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: i * 0.1 }}
+              className={`${item.color} p-7 rounded-3xl shadow-md hover:shadow-lg transition-all`}
+            >
+              <h3 className={`${item.text} text-2xl font-semibold mb-3`}>{item.title}</h3>
+              <p className={`${item.text}`}>{item.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ABOUT */}
+      <section className="px-6 md:px-14 py-24">
+        <div className="grid md:grid-cols-2 gap-14 items-center">
+
+          <motion.img
+            src="/hero2.avif"
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="w-full max-w-md mx-auto rounded-3xl shadow-md"
+          />
+
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="space-y-6"
+          >
+            <h2 className="text-4xl font-bold leading-snug">
+              Edukasi Yang Lebih Dekat Dengan Keluarga
+            </h2>
+
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Dengan pendekatan modern, kami menciptakan pengalaman belajar yang 
+              menyenangkan dan mudah dipahami oleh semua kalangan ibu. 
+              Setiap materi dibuat simpel, aplikatif, dan relevan.
+            </p>
+
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Belajar bersama anak kini jauh lebih hangat, nyaman, dan penuh warna.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="px-6 md:px-14 py-20 bg-gradient-to-r from-pink-400 to-pink-500 text-white text-center rounded-t-3xl">
+        <motion.h2
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl font-bold mb-6"
+        >
+          Ayo Mulai Perjalanan Belajar Hari Ini!
+        </motion.h2>
+
+        <Link href={"/login"}>
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
+          className="px-8 py-4 bg-white text-pink-600 rounded-2xl font-semibold text-lg shadow-xl"
+        >
+          Daftar Gratis
+        </motion.button></Link>
+      </section>
+    </main>
   );
 }
