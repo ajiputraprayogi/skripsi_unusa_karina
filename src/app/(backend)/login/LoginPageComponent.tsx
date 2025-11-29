@@ -20,7 +20,7 @@ export default function LoginPageComponent() {
       if (session.user.level === "admin") {
         router.replace("/backend");
       } else {
-        router.replace("/quiz");
+        router.replace("/pretest");
       }
     }
   }, [status, session, router]);
