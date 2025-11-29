@@ -64,6 +64,7 @@ export default function KuisionerPage() {
       userId: USER_ID,
       questionId: Number(qId),
       answerValue: ans,
+      soal: "POS_TEST",
     }));
 
     const res = await fetch("/api/questions/post", {
