@@ -46,6 +46,7 @@ model responses {
   answer_value        String    @db.VarChar(50)
   calculated_score    Int
   submitted_at        DateTime  @default(now()) @db.Timestamp(6)
+  soal                String?   @db.VarChar
   questions           questions @relation(fields: [question_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users               users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 

@@ -20,6 +20,7 @@ export async function GET(request, { params }) {
         calculated_score: true,
         submitted_at: true,
         response_session_id: true,
+        soal: true,
         questions: {
           select: {
             question_text: true,
