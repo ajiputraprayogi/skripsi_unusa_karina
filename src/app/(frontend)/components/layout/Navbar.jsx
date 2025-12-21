@@ -9,20 +9,20 @@ import Link from "next/link";
 export default function Navbar({
   brand = "Monarch",
   links = [
-    { label: "Beranda", href: "/" },
-    { label: "Layanan", href: "/layanan" },
+    { label: "Login", href: "/logging" },
+    { label: "Register", href: "/register" },
     // { label: "Harga & Layanan", href: "/pricing" },
     // { label: "Portfolio", href: "/portfolio" },
-    {
-      label: "Portfolio",
-      dropdown: [
-        // { label: "Desain Rumah", href: "/rumah" },
-        { label: "Desain Interior", href: "/interior" },
-        { label: "Desain Eksterior", href: "/eksterior" },
-      ],
-    },
-    { label: "Harga", href: "/harga" },
-    { label: "Kontak", href: "/kontak" },
+    // {
+    //   label: "Portfolio",
+    //   dropdown: [
+    //     { label: "Desain Rumah", href: "/rumah" },
+    //     { label: "Desain Interior", href: "/interior" },
+    //     { label: "Desain Eksterior", href: "/eksterior" },
+    //   ],
+    // },
+    // { label: "Harga", href: "/harga" },
+    // { label: "Kontak", href: "/kontak" },
     // { label: "Informasi", href: "/information" },
     // { label: "Kontak", href: "/contact" },
   ],
@@ -97,9 +97,9 @@ export default function Navbar({
               <li key={l.href}>
                 <Link
                   href={l.href}
-                  className="relative text-sm text-[#2f3542] hover:text-[#eaddce] transition-colors 
+                  className="relative text-sm text-[#2f3542] hover:text-pink-400 transition-colors 
                     after:content-[''] after:absolute after:left-0 after:bottom-0 
-                    after:w-full after:h-[1px] after:bg-[#eaddce] after:scale-x-0
+                    after:w-full after:h-[1px] after:bg-pink-400 after:scale-x-0
                     after:origin-left after:transition-transform after:duration-300 
                     hover:after:scale-x-100"
                 >
