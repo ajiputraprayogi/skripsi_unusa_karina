@@ -28,7 +28,7 @@ export default function MateriSection({ email }: Props) {
         transition={{ duration: 0.5 }}
         className="bg-white shadow-lg rounded-xl p-8 max-w-xl w-full"
       >
-        <h1 className="text-2xl font-bold mb-2">
+        <h1 className="text-gray-500 text-2xl font-bold mb-2">
           {salam()}, {username} 👋
         </h1>
 
