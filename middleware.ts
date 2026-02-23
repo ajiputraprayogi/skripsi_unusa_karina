@@ -28,5 +28,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/backend/:path*"], // middleware jalan di login + backend
+  matcher: ["/login", "/backend/:path*","/quiz"], // middleware jalan di login + backend
 };

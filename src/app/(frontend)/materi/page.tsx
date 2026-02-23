@@ -1,9 +1,9 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import QuizSection from "./QuizSection";
+import MateriSection from "./MateriSection";
 
-export default async function QuizPage() {
+export default async function MateriPage() {
 
   // 1️⃣ cek login
   const session = await getServerSession(authOptions);
@@ -13,8 +13,6 @@ export default async function QuizPage() {
   }
 
   const email = session.user.email;
-
-  let filled = false;
 
   try {
 
@@ -28,21 +26,19 @@ export default async function QuizPage() {
 
     const data = await res.json();
 
-    filled = data?.filled === true;
+    // 3️⃣ jika BELUM isi quiz → redirect ke quiz
+    if (data.filled === false) {
+      redirect("/quiz");
+    }
 
   } catch (error) {
 
     console.error("Error cek spreadsheet:", error);
 
-    // jika error, anggap belum isi quiz
-    filled = false;
+    // optional: redirect ke quiz jika error
+    redirect("/quiz");
   }
 
-  // 3️⃣ redirect HARUS di luar try-catch
-  if (filled) {
-    redirect("/materi");
-  }
-
-  // 4️⃣ tampilkan quiz jika belum isi
-  return <QuizSection email={email} />;
+  // 4️⃣ jika sudah isi quiz → tampilkan materi
+  return <MateriSection email={email} />;
 }
