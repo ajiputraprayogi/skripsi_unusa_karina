@@ -1,9 +1,48 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  return NextResponse.json({ message: "ok" });
-}
+  const data = [
+    {
+      id: 1,
+      title: "Ibu 1",
+      video_url: "https://www.youtube.com/watch?v=D-x91uN7LhA",
+      usia: 25,
+    },
+    {
+      id: 2,
+      title: "Ibu 2",
+      video_url: "https://www.youtube.com/watch?v=D-x91uN7LhA",
+      usia: 32,
+    },
+    {
+      id: 4,
+      title: "Ibu 3",
+      video_url: "https://www.youtube.com/watch?v=D-x91uN7LhA",
+      usia: 28,
+    },
+        {
+      id: 5,
+      title: "Ibu 1",
+      video_url: "https://www.youtube.com/watch?v=D-x91uN7LhA",
+      usia: 25,
+    },
+    {
+      id: 6,
+      title: "Ibu 2",
+      video_url: "https://www.youtube.com/watch?v=D-x91uN7LhA",
+      usia: 32,
+    },
+    {
+      id: 7,
+      title: "Ibu 3",
+      video_url: "https://www.youtube.com/watch?v=D-x91uN7LhA",
+      usia: 28,
+    },
+  ];
 
-export async function POST() {
-  return NextResponse.json({ message: "ok" });
+  return NextResponse.json({
+    status: "success",
+    total: data.length,
+    data,
+  });
 }
