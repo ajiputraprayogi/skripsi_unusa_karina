@@ -2,6 +2,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import MateriSection from "./MateriSection";
+import UserNavbar from "../components/layout/DashboardNavbar";
+import VideoSection from "./video";
 
 export default async function MateriPage() {
 
@@ -13,6 +15,8 @@ export default async function MateriPage() {
   }
 
   const email = session.user.email;
+  const name = session.user.name || "User";
+  const avatar = session.user.image || null;
 
   try {
 
@@ -40,5 +44,16 @@ export default async function MateriPage() {
   }
 
   // 4️⃣ jika sudah isi quiz → tampilkan materi
-  return <MateriSection email={email} />;
+  return (
+    <>
+    <UserNavbar
+        name={email}
+        email={email}
+        avatar={avatar}
+      />
+  {/* <MateriSection email={email} />; */}
+  <VideoSection/>
+    </>
+  )
+  
 }

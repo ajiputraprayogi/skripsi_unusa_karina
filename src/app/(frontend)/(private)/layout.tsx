@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Ubuntu } from "next/font/google";
 import "./globals.css";
 import Providers from "./components/Provider";
-import Navbar from "./components/layout/Navbar";
+// import Navbar from "./components/layout/Navbar";
 
 const ubuntu = Ubuntu({
   subsets: ["latin"],
@@ -23,8 +23,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${ubuntu.variable} antialiased`}>
-        < Navbar />
-        <div className="p-5"></div>
+        {/* < Navbar /> */}
+        {/* <div className="mt-[5rem]"></div> */}
         <Providers>{children}</Providers>
       </body>
     </html>
