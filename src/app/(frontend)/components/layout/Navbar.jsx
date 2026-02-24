@@ -3,8 +3,10 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiMenu, HiX, HiChevronDown } from "react-icons/hi";
+import { HiUserCircle, HiLogout } from "react-icons/hi";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Navbar({
   brand = "Monarch",
@@ -35,6 +37,22 @@ export default function Navbar({
     visible: { opacity: 1, y: 0, transition: { stiffness: 400, damping: 30 } },
     exit: { opacity: 0, y: -8, transition: { duration: 0.18 } },
   };
+
+    const pathname = usePathname();
+
+  const hiddenNavbarRoutes = [
+    "/logging",
+    "/register",
+    "/quiz",
+    "/dashboard",
+  ];
+
+  // untuk route dinamis (contoh /dashboard/xxx)
+  const shouldHideNavbar =
+    hiddenNavbarRoutes.includes(pathname) ||
+    pathname.startsWith("/dashboard/");
+
+  if (shouldHideNavbar) return null;
 
   return (
     <header className="fixed top-4 left-0 right-0 z-50 px-4 md:px-8 ">

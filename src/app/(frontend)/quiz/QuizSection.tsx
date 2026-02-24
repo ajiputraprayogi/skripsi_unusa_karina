@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Lottie from "lottie-react";
+import quizAnimation from "./quiz.json";
 
 interface QuizSectionProps {
   email: string;
@@ -29,18 +31,23 @@ export default function QuizSection({ email }: QuizSectionProps) {
         className="absolute bottom-10 right-10 w-56 h-56 rounded-full bg-purple-200 blur-3xl"
       />
 
-      <div className="grid md:grid-cols-2 gap-14 items-center relative z-10">
+      <div className="grid md:grid-cols-2 gap-7 items-center relative z-10">
 
         {/* IMAGE */}
-        <motion.img
+                <motion.div
           initial={{ opacity: 0, x: -40, scale: 0.95 }}
           whileInView={{ opacity: 1, x: 0, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          src="https://cdn-icons-png.flaticon.com/512/4341/4341139.png"
-          alt="Quiz tumbuh kembang anak"
-          className="w-full max-w-md mx-auto rounded-3xl shadow-lg"
-        />
+          className="w-full max-w-xl mx-auto"
+        >
+          <Lottie
+            animationData={quizAnimation}
+            loop
+            autoplay
+            className="w-full h-auto"
+          />
+        </motion.div>
 
         {/* TEXT */}
         <motion.div
