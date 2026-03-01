@@ -38,24 +38,6 @@ export default function Navbar({
     exit: { opacity: 0, y: -8, transition: { duration: 0.18 } },
   };
 
-  const pathname = usePathname();
-
-  const hiddenNavbarRoutes = [
-    "/logging",
-    "/register",
-    "/quiz",
-    "/dashboard",
-    "/login",
-    "/materi"
-  ];
-
-  // untuk route dinamis (contoh /dashboard/xxx)
-  const shouldHideNavbar =
-    hiddenNavbarRoutes.includes(pathname) ||
-    pathname.startsWith("/dashboard/");
-
-  if (shouldHideNavbar) return null;
-
   return (
     <header className="fixed top-4 left-0 right-0 z-50 px-4 md:px-8 ">
       <nav className="mx-auto w-full bg-white/15 backdrop-blur-md border border-[#14100c]/15 rounded-2xl px-4 py-3 flex items-center justify-between gap-4">
@@ -66,7 +48,6 @@ export default function Navbar({
               
             </Link>
           </span>
-          {/* <span className="font-semibold text-white">{brand}</span> */}
         </div>
 
         {/* Desktop links */}
