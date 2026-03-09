@@ -91,7 +91,7 @@ export const authOptions: NextAuthOptions = {
   },
   async redirect({ url, baseUrl }) {
    if (url.startsWith(baseUrl)) return url;
-   return `${baseUrl}/backend`;
+   return `${baseUrl}/`;
   },
  },
  secret: process.env.NEXTAUTH_SECRET,

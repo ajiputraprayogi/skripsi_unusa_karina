@@ -11,7 +11,7 @@ import { usePathname } from "next/navigation";
 export default function Navbar({
   brand = "Monarch",
   links = [
-    { label: "Login", href: "/logging" },
+    { label: "Login", href: "/login" },
     { label: "Register", href: "/register" },
     // { label: "Harga & Layanan", href: "/pricing" },
     // { label: "Portfolio", href: "/portfolio" },

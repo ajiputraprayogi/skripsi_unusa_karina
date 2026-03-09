@@ -8,7 +8,7 @@ type Video = {
 
 /* ================= SERVER FETCH ================= */
 async function getVideos(): Promise<Video[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/materi`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/dummy`, {
     cache: "no-store",
   });
 
@@ -31,21 +31,21 @@ export default async function VideoSection() {
         {/* Heading */}
         <div className="mb-14 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-pink-600">
-            Video Pengenalan
+            Video Materi
           </h2>
           <p className="mt-3 text-sm text-pink-400">
             Menuju Indonesia Sehat 🌸
           </p>
         </div>
 
-        {/* VIDEO LIST */}
-        <div className="flex flex-col items-center gap-10">
+        {/* VIDEO GRID */}
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 justify-items-center">
 
           {videos.map((video) => (
             <div
               key={video.id}
               className="
-                group w-full max-w-xl
+                group w-full max-w-sm
                 rounded-3xl border border-pink-100
                 bg-white/80 backdrop-blur
                 p-4 shadow-sm
@@ -79,7 +79,7 @@ export default async function VideoSection() {
         {/* BUTTON LANJUT */}
         <div className="mt-16 flex justify-center">
           <a
-            href="/video-materi"
+            href="/posttest"
             className="
               px-10 py-4
               bg-pink-500 hover:bg-pink-600
@@ -91,7 +91,7 @@ export default async function VideoSection() {
               transition-all duration-200
             "
           >
-            Lanjut ke Materi Selanjutnya →
+            Lanjut ke Post Test →
           </a>
         </div>
 
