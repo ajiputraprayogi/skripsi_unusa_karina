@@ -50,9 +50,9 @@ export default function UserNavbar({ name, email, avatar }: Props) {
             Video Materi
           </Link>
 
-          <Link href="/posttest" className={menuStyle}>
+          {/* <Link href="/posttest" className={menuStyle}>
             Post Test
-          </Link>
+          </Link> */}
 
         </div>
 

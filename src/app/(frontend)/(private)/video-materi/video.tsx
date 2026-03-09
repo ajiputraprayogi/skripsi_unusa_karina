@@ -77,7 +77,7 @@ export default async function VideoSection() {
         </div>
 
         {/* BUTTON LANJUT */}
-        <div className="mt-16 flex justify-center">
+        {/* <div className="mt-16 flex justify-center">
           <a
             href="/posttest"
             className="
@@ -93,7 +93,7 @@ export default async function VideoSection() {
           >
             Lanjut ke Post Test →
           </a>
-        </div>
+        </div> */}
 
       </div>
     </section>
