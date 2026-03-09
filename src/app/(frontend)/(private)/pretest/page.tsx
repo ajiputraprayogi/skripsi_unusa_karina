@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import PretestSection from "./PretestSection";
+import PretestDoneSection from "./PretestDoneSection";
 import UserNavbar from "../components/layout/DashboardNavbar";
-import VideoSection from "./video";
 
 export const metadata: Metadata = {
-  title: "Halaman Materi",
+  title: "Halaman Pre Test",
 };
 
-export default async function MateriPage() {
+export default async function PretestPage() {
 
-  // 1️⃣ cek login
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user?.email) {
@@ -20,11 +20,12 @@ export default async function MateriPage() {
 
   const email = session.user.email;
   const name = session.user.nama || "User";
-  const avatar = session.user.image || null;
+  const avatar = session.user.image || "";
+
+  let filled = false;
 
   try {
 
-    // 2️⃣ cek ke Google Apps Script
     const res = await fetch(
       `https://script.google.com/macros/s/AKfycbwCyjqiI5KzPw6tMIdZizpKVd5XzI6TtNJliXrQgY9ZQCeZDXf72f_srLRuSbnA-Jdl/exec?email=${encodeURIComponent(email)}`,
       {
@@ -33,37 +34,28 @@ export default async function MateriPage() {
     );
 
     const data = await res.json();
-
-    // 3️⃣ jika BELUM isi pretest → redirect ke pretest
-    if (data.filled === false) {
-      redirect("/pretest");
-    }
+    filled = data?.filled === true;
 
   } catch (error) {
 
     console.error("Error cek spreadsheet:", error);
+    filled = false;
 
-    // optional: redirect ke pretest jika error
-    redirect("/pretest");
   }
 
-  // 4️⃣ jika sudah isi pretest → tampilkan materi
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 via-white to-pink-100">
-      
+    <>
       <UserNavbar
         name={name}
         email={email}
         avatar={avatar}
       />
 
-      <main className="flex justify-center px-6 py-10">
-        <div className="w-full max-w-6xl">
-          <VideoSection />
-        </div>
-      </main>
-
-    </div>
+      {filled ? (
+        <PretestDoneSection />
+      ) : (
+        <PretestSection email={email} />
+      )}
+    </>
   );
-  
 }

@@ -1,0 +1,35 @@
+import { NextResponse } from "next/server";
+
+export async function GET() {
+  const data = [
+    {
+      id: 1,
+      title: "Mengenal Perkembangan Anak dan Pentingnya Stimulasi Sejak Dini",
+      video_url: "https://www.youtube.com/watch?v=avv2nboB01Q",
+    }
+    // {
+    //   id: 5,
+    //   title: "Ibu 1",
+    //   video_url: "https://www.youtube.com/watch?v=D-x91uN7LhA",
+    //   usia: 25,
+    // },
+    // {
+    //   id: 6,
+    //   title: "Ibu 2",
+    //   video_url: "https://www.youtube.com/watch?v=D-x91uN7LhA",
+    //   usia: 32,
+    // },
+    // {
+    //   id: 7,
+    //   title: "Ibu 3",
+    //   video_url: "https://www.youtube.com/watch?v=D-x91uN7LhA",
+    //   usia: 28,
+    // },
+  ];
+
+  return NextResponse.json({
+    status: "success",
+    total: data.length,
+    data,
+  });
+}
