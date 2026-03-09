@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiMenu, HiX, HiChevronDown } from "react-icons/hi";
-import { HiUserCircle, HiLogout } from "react-icons/hi";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,7 +10,7 @@ import { usePathname } from "next/navigation";
 export default function Navbar({
   brand = "Monarch",
   links = [
-    { label: "Login", href: "/logging" },
+    { label: "Login", href: "/login" },
     { label: "Register", href: "/register" },
     // { label: "Harga & Layanan", href: "/pricing" },
     // { label: "Portfolio", href: "/portfolio" },
@@ -43,10 +42,12 @@ export default function Navbar({
   const hiddenNavbarRoutes = [
     "/logging",
     "/register",
-    "/quiz",
+    "/pretest",
+    "/posttest",
     "/dashboard",
     "/login",
-    "/materi"
+    "/materi",
+    "/video-materi"
   ];
 
   // untuk route dinamis (contoh /dashboard/xxx)

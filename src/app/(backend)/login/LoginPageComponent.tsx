@@ -20,7 +20,7 @@ export default function LoginPageComponent() {
       if (session.user.level === "admin") {
         router.replace("/backend");
       } else {
-        router.replace("/quiz");
+        router.replace("/pretest");
       }
     }
   }, [status, session, router]);
@@ -50,7 +50,7 @@ export default function LoginPageComponent() {
       const level = newSession?.user?.level;
 
       if (level === "Admin") router.push("/backend");
-      else router.push("/quiz");
+      else router.push("/pretest");
     } else {
       setErrorMessage(res?.error || "Login gagal: nama lengkap atau email salah");
       setLoading(false);
@@ -93,7 +93,7 @@ export default function LoginPageComponent() {
             <label className="text-sm text-gray-600">Email</label>
             <input
               type="email"
-              placeholder="_@gmail.com"
+              placeholder="Masukkan email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

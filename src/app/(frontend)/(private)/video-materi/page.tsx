@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import UserNavbar from "../components/layout/DashboardNavbar";
 import VideoSection from "./video";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Halaman Materi",
