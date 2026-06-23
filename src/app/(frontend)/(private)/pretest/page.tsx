@@ -27,7 +27,7 @@ export default async function PretestPage() {
   try {
 
     const res = await fetch(
-      `https://script.google.com/macros/s/AKfycbwCyjqiI5KzPw6tMIdZizpKVd5XzI6TtNJliXrQgY9ZQCeZDXf72f_srLRuSbnA-Jdl/exec?email=${encodeURIComponent(email)}`,
+      `https://script.google.com/macros/s/AKfycbz7VXp27u0kELz19CbAzs9a0ZJE_sjIU9QUX8iZLR13Gqc4WWf0k6dnxZdN51hFQ6Jq/exec?email=${encodeURIComponent(email)}`,
       {
         cache: "no-store",
       }
