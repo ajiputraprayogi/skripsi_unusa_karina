@@ -20,7 +20,7 @@ export default async function QuizPage() {
 
     // 2️⃣ cek ke Google Apps Script
     const res = await fetch(
-      `https://script.google.com/macros/s/AKfycbzNawjTmg8xVqMgiiiRsbCsL1kKGl91xFd6HuUV9129fc-_7WpDvg49CUwdsYKxWz98gQ/exec?email=${encodeURIComponent(email)}`,
+      `https://script.google.com/macros/s/AKfycbwi7D3FJUqq20kyMRoFigvvSATY84c1LoVCTOVf7PgGi8xZqKqJjupBOqF3U5WLT8Co7w/exec?email=${encodeURIComponent(email)}`,
       {
         cache: "no-store",
       }

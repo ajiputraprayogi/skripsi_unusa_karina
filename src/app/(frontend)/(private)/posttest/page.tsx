@@ -30,7 +30,7 @@ export default async function PosttestPage() {
   // ====================
   try {
     const pretestRes = await fetch(
-      `https://script.google.com/macros/s/AKfycbwCyjqiI5KzPw6tMIdZizpKVd5XzI6TtNJliXrQgY9ZQCeZDXf72f_srLRuSbnA-Jdl/exec?email=${encodeURIComponent(email)}`,
+      `https://script.google.com/macros/s/AKfycbz7VXp27u0kELz19CbAzs9a0ZJE_sjIU9QUX8iZLR13Gqc4WWf0k6dnxZdN51hFQ6Jq/exec?email=${encodeURIComponent(email)}`,
       {
         cache: "no-store",
       }
@@ -53,7 +53,7 @@ export default async function PosttestPage() {
   // ====================
   try {
     const posttestRes = await fetch(
-      `https://script.google.com/macros/s/AKfycbzNawjTmg8xVqMgiiiRsbCsL1kKGl91xFd6HuUV9129fc-_7WpDvg49CUwdsYKxWz98gQ/exec?email=${encodeURIComponent(email)}`,
+      `https://script.google.com/macros/s/AKfycbwi7D3FJUqq20kyMRoFigvvSATY84c1LoVCTOVf7PgGi8xZqKqJjupBOqF3U5WLT8Co7w/exec?email=${encodeURIComponent(email)}`,
       {
         cache: "no-store",
       }
