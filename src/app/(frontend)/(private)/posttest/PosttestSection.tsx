@@ -11,7 +11,7 @@ interface PosttestSectionProps {
 export default function PosttestSection({ email }: PosttestSectionProps) {
 
   const GOOGLE_FORM_URL =
-    "https://docs.google.com/forms/d/e/1FAIpQLSf0r9anx463v44JYfzwCAPmq9EfqQ3RauHv22nU2Vxf9aX90A/viewform";
+    "https://forms.gle/vyMU6Sc49EcYvybj8";
 
   return (
     <section className="relative min-h-screen flex items-center px-6 md:px-14 py-24 bg-gradient-to-b from-white via-pink-50 to-white overflow-hidden">  
