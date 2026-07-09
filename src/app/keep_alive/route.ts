@@ -2,67 +2,77 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { Prisma } from "@prisma/client"; // Wajib diimpor untuk Prisma.sql
-
-// Tipe data untuk hasil raw query
-type PingResult = {
-    last_ping: Date;
-}
 
 /**
- * ✅ GET: Memicu 'ping' (UPSERT/UPDATE baris tunggal) dan menampilkan waktu ping terbaru.
- * * Catatan: Kode ini dirancang untuk tabel yang memiliki Primary Key (id), 
- * * yang sesuai dengan error 'Key (id)=(1) already exists'.
+ * ✅ GET: Memicu 'ping' (UPSERT/UPDATE baris tunggal) dan melakukan ping ke Google Apps Script (pretest & posttest)
+ * untuk menghindari cold start.
  */
 export async function GET() {
-  let newPingTime: Date | null = null;
-  
+  let dbSuccess = false;
+  let updatedKeepAlive = null;
+  const googleAppsScriptResults: Record<string, any> = {};
+
+  const email = "prayogiputraaji@gmail.com";
+  const urlEksperimen = `https://script.google.com/macros/s/AKfycbz7VXp27u0kELz19CbAzs9a0ZJE_sjIU9QUX8iZLR13Gqc4WWf0k6dnxZdN51hFQ6Jq/exec?email=${encodeURIComponent(email)}`;
+  const urlPostTest = `https://script.google.com/macros/s/AKfycbwi7D3FJUqq20kyMRoFigvvSATY84c1LoVCTOVf7PgGi8xZqKqJjupBOqF3U5WLT8Co7w/exec?email=${encodeURIComponent(email)}`;
+
+  // 1. **Memicu 'Ping' Database (Supabase) menggunakan Prisma**
   try {
-    // 1. **Memicu 'Ping' (UPSERT Raw Query)**
-    // Perintah ini akan:
-    // a) Mencoba INSERT (1, NOW()).
-    // b) Jika terjadi konflik pada 'id', ia akan menjalankan UPDATE: SET last_ping = NOW().
-    await prisma.$executeRaw(
-      Prisma.sql`
-        INSERT INTO public.keep_alive (id, last_ping) 
-        VALUES (1, NOW()) 
-        ON CONFLICT (id) DO UPDATE 
-        SET last_ping = NOW();
-      `
-    );
-    
-    // 2. **Mengambil Waktu Ping Terakhir (SELECT Raw Query)**
-    // Ambil data tunggal yang baru saja di-update.
-    const latestPingResult = await prisma.$queryRaw<PingResult[]>(
-        Prisma.sql`SELECT last_ping FROM public.keep_alive WHERE id = 1;`
-    );
-
-    newPingTime = latestPingResult[0]?.last_ping ?? null;
-
-    if (!newPingTime) {
-        throw new Error("Ping recorded but failed to retrieve timestamp."); 
-    }
-
-    // Mengembalikan status 200 OK
-    return NextResponse.json({ 
-        message: "Keep-alive ping successful (UPSERT mode).", 
-        newPingTime: newPingTime,
+    updatedKeepAlive = await prisma.keep_alive.upsert({
+      where: { id: 1 },
+      update: { last_ping: new Date() },
+      create: { id: 1, last_ping: new Date() },
     });
+    dbSuccess = true;
   } catch (error) {
-    // Jika ada error lain (misalnya koneksi), tetap log detailnya.
     console.error("Prisma error (GET Keep-Alive/UPSERT Failed):", error);
-    
+  }
+
+  // 2. **Memicu 'Ping' Google Apps Script (Eksperimen & Post Test)**
+  try {
+    const [resEksperimen, resPostTest] = await Promise.allSettled([
+      fetch(urlEksperimen, { cache: "no-store", signal: AbortSignal.timeout(10000) }).then((r) => r.json()),
+      fetch(urlPostTest, { cache: "no-store", signal: AbortSignal.timeout(10000) }).then((r) => r.json()),
+    ]);
+
+    googleAppsScriptResults.eksperimen =
+      resEksperimen.status === "fulfilled"
+        ? { success: true, data: resEksperimen.value }
+        : { success: false, error: String(resEksperimen.reason) };
+
+    googleAppsScriptResults.postTest =
+      resPostTest.status === "fulfilled"
+        ? { success: true, data: resPostTest.value }
+        : { success: false, error: String(resPostTest.reason) };
+  } catch (error) {
+    console.error("Google Apps Script ping failed:", error);
+    googleAppsScriptResults.error = String(error);
+  }
+
+  // Jika DB fail, kembalikan status 500
+  if (!dbSuccess) {
     return NextResponse.json(
-      { 
-        error: "Failed to perform keep-alive UPSERT. Check server logs for database connection details.",
+      {
+        error: "Failed to perform database keep-alive. Check server logs.",
+        googleAppsScript: googleAppsScriptResults,
       },
       { status: 500 }
     );
   }
+
+  // Mengembalikan status 200 OK beserta detail response keep-alive
+  return NextResponse.json({
+    message: "Keep-alive ping completed.",
+    dbKeepAlive: {
+      success: true,
+      newPingTime: updatedKeepAlive?.last_ping,
+    },
+    googleAppsScript: googleAppsScriptResults,
+  });
 }
 
 /**
- * ❌ POST: Dinonaktifkan (opsional)
+ * ❌ POST: Dinonaktifkan
  */
 export async function POST() {
     return NextResponse.json(
